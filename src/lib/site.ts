@@ -1,2 +1,2 @@
-// Approximate centre of Lake Charlotte (Halifax County, NS). Replace with the surveyed island position once the parcel is confirmed.
-export const ISLAND = { lat: 44.838, lng: -62.97 }
+// Laich Island, Lake Charlotte, Halifax County, Nova Scotia
+export const ISLAND = { lat: 44.813188, lng: -62.974717 }
