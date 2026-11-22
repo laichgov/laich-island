@@ -5,7 +5,7 @@ export type Citizen = {
   id: number; citizen_number: string; alias: string; title: string | null; reason: string | null
   status: 'pending' | 'approved' | 'rejected'; is_admin: boolean; created_at: string
 }
-export type Ref = { id: number; title: string; description: string; author: string; yes: number; no: number; abstain: number; mine: string | null }
+export type Ref = { id: number; title: string; description: string; author: string; closed: boolean; closes_at: string | null; open: boolean; yes: number; no: number; abstain: number; mine: string | null }
 type Row = Citizen & { pw_hash: string | null }
 
 const URL = process.env.DATABASE_URL
@@ -33,13 +33,15 @@ export function init() {
     if (!sql) {
       if (M.ready) return; M.ready = true
       M.citizens.push({ id: 1, citizen_number: 'CLI-0001', alias: 'Founder & Managing Minister', title: 'Founder & Managing Minister', reason: null, status: 'approved', is_admin: true, created_at: new Date().toISOString(), pw_hash: null })
-      SEED_REFS.forEach(([t, d], i) => M.refs.push({ id: i + 1, title: t, description: d, author: 'Managing Minister' }))
+      SEED_REFS.forEach(([t, d], i) => M.refs.push({ id: i + 1, title: t, description: d, author: 'Managing Minister', closed: false, closes_at: null }))
       return
     }
     await q(`CREATE TABLE IF NOT EXISTS citizens (id SERIAL PRIMARY KEY, citizen_number TEXT UNIQUE, alias TEXT NOT NULL, title TEXT, reason TEXT, pw_hash TEXT, status TEXT NOT NULL DEFAULT 'pending', is_admin BOOLEAN NOT NULL DEFAULT FALSE, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`)
     await q(`CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, citizen_id INT NOT NULL)`)
     await q(`CREATE TABLE IF NOT EXISTS referendums (id SERIAL PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, author TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`)
     await q(`CREATE TABLE IF NOT EXISTS votes (referendum_id INT NOT NULL, citizen_id INT NOT NULL, choice TEXT NOT NULL, PRIMARY KEY (referendum_id, citizen_id))`)
+    await q(`ALTER TABLE referendums ADD COLUMN IF NOT EXISTS closed BOOLEAN NOT NULL DEFAULT FALSE`)
+    await q(`ALTER TABLE referendums ADD COLUMN IF NOT EXISTS closes_at TIMESTAMPTZ`)
     await q(`INSERT INTO citizens (citizen_number, alias, title, status, is_admin) SELECT 'CLI-0001','Founder & Managing Minister','Founder & Managing Minister','approved',TRUE WHERE NOT EXISTS (SELECT 1 FROM citizens WHERE citizen_number='CLI-0001')`)
     if (!(await q(`SELECT 1 FROM referendums LIMIT 1`)).length)
       for (const [t, d] of SEED_REFS) await q(`INSERT INTO referendums (title, description, author) VALUES ($1,$2,'Managing Minister')`, [t, d])
@@ -99,30 +101,42 @@ export async function setStatus(id: number, status: 'approved' | 'rejected') {
   if (sql) await q(`UPDATE citizens SET status=$1 WHERE id=$2 AND is_admin=FALSE`, [status, id])
   else { const c = M.citizens.find((c: Row) => c.id === id && !c.is_admin); if (c) c.status = status }
 }
+const isOpen = (r: any) => !r.closed && !(r.closes_at && new Date(r.closes_at) < new Date())
+const OPEN_SQL = `NOT closed AND (closes_at IS NULL OR closes_at > now())`
 export async function stats() {
   await init()
-  if (!sql) return { citizens: M.citizens.filter((c: Row) => c.status === 'approved').length, referendums: M.refs.length }
-  const [a] = await q(`SELECT count(*)::int n FROM citizens WHERE status='approved'`); const [b] = await q(`SELECT count(*)::int n FROM referendums`)
+  if (!sql) return { citizens: M.citizens.filter((c: Row) => c.status === 'approved').length, referendums: M.refs.filter(isOpen).length }
+  const [a] = await q(`SELECT count(*)::int n FROM citizens WHERE status='approved'`); const [b] = await q(`SELECT count(*)::int n FROM referendums WHERE ${OPEN_SQL}`)
   return { citizens: a.n as number, referendums: b.n as number }
 }
 export async function listRefs(uid?: number): Promise<Ref[]> {
   await init()
   if (!sql) return M.refs.map((r: any) => {
     const v = M.votes.filter((x: any) => x.rid === r.id), n = (c: string) => v.filter((x: any) => x.choice === c).length
-    return { ...r, yes: n('yes'), no: n('no'), abstain: n('abstain'), mine: v.find((x: any) => x.cid === uid)?.choice ?? null }
-  }).reverse()
-  return (await q(`SELECT r.id,r.title,r.description,r.author,
+    return { ...r, open: isOpen(r), yes: n('yes'), no: n('no'), abstain: n('abstain'), mine: v.find((x: any) => x.cid === uid)?.choice ?? null }
+  }).sort((a: any, b: any) => Number(b.open) - Number(a.open) || b.id - a.id)
+  return (await q(`SELECT r.id,r.title,r.description,r.author,r.closed,r.closes_at,
+    (NOT r.closed AND (r.closes_at IS NULL OR r.closes_at > now())) AS open,
     count(*) FILTER (WHERE v.choice='yes')::int yes, count(*) FILTER (WHERE v.choice='no')::int no, count(*) FILTER (WHERE v.choice='abstain')::int abstain,
     max(CASE WHEN v.citizen_id=$1 THEN v.choice END) mine
-    FROM referendums r LEFT JOIN votes v ON v.referendum_id=r.id GROUP BY r.id ORDER BY r.id DESC`, [uid ?? -1])) as Ref[]
+    FROM referendums r LEFT JOIN votes v ON v.referendum_id=r.id GROUP BY r.id ORDER BY open DESC, r.id DESC`, [uid ?? -1])) as Ref[]
 }
-export async function vote(rid: number, cid: number, choice: string) {
+export async function vote(rid: number, cid: number, choice: string): Promise<boolean> {
   await init()
-  if (!sql) { const v = M.votes.find((x: any) => x.rid === rid && x.cid === cid); if (v) v.choice = choice; else M.votes.push({ rid, cid, choice }); return }
-  await q(`INSERT INTO votes VALUES ($1,$2,$3) ON CONFLICT (referendum_id, citizen_id) DO UPDATE SET choice=EXCLUDED.choice`, [rid, cid, choice])
+  if (!sql) {
+    const r = M.refs.find((x: any) => x.id === rid); if (!r || !isOpen(r)) return false
+    const v = M.votes.find((x: any) => x.rid === rid && x.cid === cid); if (v) v.choice = choice; else M.votes.push({ rid, cid, choice }); return true
+  }
+  const r = await q(`INSERT INTO votes (referendum_id, citizen_id, choice) SELECT $1::int, $2::int, $3::text WHERE EXISTS (SELECT 1 FROM referendums WHERE id=$1::int AND ${OPEN_SQL}) ON CONFLICT (referendum_id, citizen_id) DO UPDATE SET choice=EXCLUDED.choice RETURNING citizen_id`, [rid, cid, choice])
+  return r.length > 0
 }
-export async function addRef(title: string, description: string, author: string) {
+export async function addRef(title: string, description: string, author: string, days?: number) {
   await init()
-  if (!sql) M.refs.push({ id: M.refs.length + 1, title, description, author })
-  else await q(`INSERT INTO referendums (title, description, author) VALUES ($1,$2,$3)`, [title, description, author])
+  const closes = days ? new Date(Date.now() + days * 864e5).toISOString() : null
+  if (!sql) M.refs.push({ id: M.refs.length + 1, title, description, author, closed: false, closes_at: closes })
+  else await q(`INSERT INTO referendums (title, description, author, closes_at) VALUES ($1,$2,$3,$4)`, [title, description, author, closes])
+}
+export async function closeRef(id: number) {
+  await init()
+  if (!sql) { const r = M.refs.find((x: any) => x.id === id); if (r) r.closed = true } else await q(`UPDATE referendums SET closed=TRUE WHERE id=$1`, [id])
 }

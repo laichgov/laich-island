@@ -12,18 +12,23 @@ function Home() {
   const pct = Math.min(100, (RAISED / GOAL) * 100)
   return (
     <div className="space-y-12">
-      <section className="max-w-3xl">
-        <h1 className="text-4xl font-semibold leading-tight sm:text-6xl">Commonwealth of Laich Island</h1>
-        <p className="mt-3 text-2xl text-slate-200">A Real Island. A Real Direct Democracy.</p>
-        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">
-          A crowd-funded, social-liberal direct democracy centred on acquiring Laich Island (Lake Charlotte, Nova Scotia, Canada) as a shared, off-grid ecological sanctuary where every citizen votes directly on every decision.
-        </p>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <Link to="/passport" className="btn">Claim your free Citizen ID</Link>
-          <Link to="/referendums" className="btn blue">Vote in the Hall</Link>
-          <a className="btn ghost" href="https://boosty.to/laich" target="_blank" rel="noreferrer">Fund the island on Boosty</a>
-          <a className="btn ghost" href="https://www.youtube.com/@laichgov" target="_blank" rel="noreferrer">Watch on YouTube</a>
+      <section className="grid items-center gap-8 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+          <h1 className="text-4xl font-semibold leading-tight sm:text-6xl">Commonwealth of Laich Island</h1>
+          <p className="mt-3 text-2xl text-slate-200">A Real Island. A Real Direct Democracy.</p>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">A crowd-funded, social-liberal direct democracy centred on acquiring Laich Island (Lake Charlotte, Nova Scotia, Canada) as a shared, off-grid ecological sanctuary where every citizen votes directly on every decision.</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link to="/passport" className="btn">Claim your free Citizen ID</Link>
+            <Link to="/referendums" className="btn blue">Vote in the Hall</Link>
+            <Link to="/territory" className="btn ghost">See the island on the globe</Link>
+            <a className="btn ghost" href="https://boosty.to/laich" target="_blank" rel="noreferrer">Fund the island on Boosty</a>
+            <a className="btn ghost" href="https://www.youtube.com/@laichgov" target="_blank" rel="noreferrer">Watch on YouTube</a>
+          </div>
         </div>
+        <figure className="glass p-3 lg:col-span-2">
+          <img src="/flag.png" alt="National flag of the Commonwealth of Laich Island" className="w-full rounded-lg" />
+          <figcaption className="px-1 pt-2 text-center text-sm text-slate-400">The national flag</figcaption>
+        </figure>
       </section>
 
       <section className="glass p-6">

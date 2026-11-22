@@ -1,7 +1,6 @@
 import { HeadContent, Scripts, Outlet, createRootRoute, Link } from '@tanstack/react-router'
 import css from '../styles.css?url'
 import { getMe } from '~/lib/server'
-import { Flag } from '~/lib/art'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -22,7 +21,7 @@ function Root() {
         <header className="sticky top-0 z-50 border-b border-white/10 bg-ink/80 backdrop-blur">
           <nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
             <Link to="/" className="flex items-center gap-2 font-[var(--font-display)] text-lg font-semibold">
-              <Flag className="h-6 w-9 rounded-sm" /> Laich Island
+              <img src="/flag.png" alt="" className="h-6 w-10 rounded-sm object-cover" /> Laich Island
             </Link>
             <div className="ml-auto flex flex-wrap gap-4 text-sm text-slate-300">
               {nav.map(([to, label]) => (

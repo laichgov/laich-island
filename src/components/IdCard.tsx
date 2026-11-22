@@ -10,17 +10,13 @@ const mrz = (c: CardData) => {
 }
 const rr = (x: CanvasRenderingContext2D, a: number, b: number, w: number, h: number, r: number) => { x.beginPath(); x.roundRect(a, b, w, h, r) }
 
-function draw(cv: HTMLCanvasElement, c: CardData, img: HTMLImageElement | null) {
+function draw(cv: HTMLCanvasElement, c: CardData, img: HTMLImageElement | null, flag: HTMLImageElement | null) {
   const x = cv.getContext('2d')!
   x.clearRect(0, 0, W, H)
   const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#0B1320'); g.addColorStop(1, '#14385c')
   rr(x, 0, 0, W, H, 36); x.fillStyle = g; x.fill()
   x.save(); x.globalAlpha = 0.08; x.fillStyle = '#1E6FD9'; x.translate(520, 60); x.scale(5.2, 5.2); x.fill(new Path2D(LEAF)); x.restore()
-  x.save(); x.translate(40, 34); x.scale(0.5, 0.5); x.beginPath(); x.rect(0, 0, 300, 200); x.clip()
-  x.fillStyle = '#fff'; x.fillRect(0, 0, 300, 200)
-  x.strokeStyle = '#1F8A5B'; x.lineWidth = 30; x.beginPath(); x.moveTo(0, 0); x.lineTo(300, 200); x.moveTo(300, 0); x.lineTo(0, 200); x.stroke()
-  x.fillStyle = '#1E6FD9'; x.beginPath(); x.arc(150, 100, 52, 0, 7); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 4; x.stroke()
-  x.translate(120, 70); x.scale(0.6, 0.6); x.fillStyle = '#fff'; x.fill(new Path2D(LEAF)); x.restore()
+  if (flag) { x.save(); rr(x, 36, 30, 168, 101, 8); x.clip(); x.drawImage(flag, 36, 30, 168, 101); x.restore() }
   x.fillStyle = '#fff'; x.font = '700 34px Georgia, serif'; x.fillText('COMMONWEALTH OF LAICH ISLAND', 215, 70)
   x.fillStyle = '#9fb4cc'; x.font = '600 22px system-ui, sans-serif'; x.fillText('Digital Citizen ID, Lake Charlotte, Nova Scotia', 215, 100)
   rr(x, 215, 118, 250, 38, 19); x.fillStyle = '#1F8A5B'; x.fill()
@@ -47,8 +43,10 @@ export function IdCard({ data, onCanvas }: { data: CardData; onCanvas?: (c: HTML
   const [url, setUrl] = useState('')
   const [tilt, setTilt] = useState({ x: 0, y: 0, mx: 50, my: 50 })
   const [flip, setFlip] = useState(false)
+  const [flag, setFlag] = useState<HTMLImageElement | null>(null)
+  useEffect(() => { const i = new Image(); i.onload = () => setFlag(i); i.src = '/flag.png' }, [])
 
-  useEffect(() => { const c = ref.current!; draw(c, data, img); setUrl(c.toDataURL('image/png')); onCanvas?.(c) }, [data.number, data.alias, data.title, img])
+  useEffect(() => { const c = ref.current!; draw(c, data, img, flag); setUrl(c.toDataURL('image/png')); onCanvas?.(c) }, [data.number, data.alias, data.title, img, flag])
 
   const upload = (f?: File) => { if (!f) return; const i = new Image(); i.onload = () => setImg(i); i.src = URL.createObjectURL(f) }
   const move = (e: React.MouseEvent<HTMLDivElement>) => {
