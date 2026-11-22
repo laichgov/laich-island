@@ -30,8 +30,8 @@ function Root() {
             </div>
           </nav>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-10"><Outlet /></main>
-        <footer className="mt-16 border-t border-white/10 py-10 text-sm text-slate-400">
+        <main className="relative z-10 mx-auto max-w-6xl px-4 py-10"><Outlet /></main>
+        <footer className="relative z-10 mt-16 border-t border-white/10 py-10 text-sm text-slate-400">
           <div className="mx-auto max-w-6xl space-y-3 px-4">
             <div className="flex flex-wrap gap-5 text-slate-200">
               <a className="hover:text-white" href="https://www.youtube.com/@laichgov" target="_blank" rel="noreferrer">YouTube</a>

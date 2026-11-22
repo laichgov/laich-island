@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { getStats } from '~/lib/server'
+import { FlagScene } from '~/components/FlagScene'
 
 const GOAL = 15000
 const RAISED = 0 // update as Phase I contributions arrive
@@ -11,8 +12,10 @@ function Home() {
   const s = Route.useLoaderData()
   const pct = Math.min(100, (RAISED / GOAL) * 100)
   return (
-    <div className="space-y-12">
-      <section className="grid items-center gap-8 lg:grid-cols-5">
+    <>
+    <FlagScene />
+    <div className="relative z-10 space-y-12">
+      <section className="grid min-h-[60vh] items-center gap-8 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <h1 className="text-4xl font-semibold leading-tight sm:text-6xl">Commonwealth of Laich Island</h1>
           <p className="mt-3 text-2xl text-slate-200">A Real Island. A Real Direct Democracy.</p>
@@ -25,10 +28,6 @@ function Home() {
             <a className="btn ghost" href="https://www.youtube.com/@laichgov" target="_blank" rel="noreferrer">Watch on YouTube</a>
           </div>
         </div>
-        <figure className="glass p-3 lg:col-span-2">
-          <img src="/flag.png" alt="National flag of the Commonwealth of Laich Island" className="w-full rounded-lg" />
-          <figcaption className="px-1 pt-2 text-center text-sm text-slate-400">The national flag</figcaption>
-        </figure>
       </section>
 
       <section className="glass p-6">
@@ -54,6 +53,7 @@ function Home() {
         <Stat label="Target island area" value="~1,500 sq m" sub="0.37 acres" />
       </section>
     </div>
+    </>
   )
 }
 const Stat = ({ label, value, sub }: { label: string; value: string; sub?: string }) => (

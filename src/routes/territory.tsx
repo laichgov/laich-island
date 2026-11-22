@@ -9,9 +9,10 @@ const facts: [string, string][] = [
   ['Lake', 'Glacial lake, up to 48 m deep and about 2 km wide, many small islands near its midpoint'],
   ['Elevation', 'Lake surface about 6 m above sea level'],
   ['Wildlife', 'Landlocked Atlantic salmon, brook trout and white perch are the lake\u2019s best-known fish'],
+  ['Public boat launch', 'Lake Charlotte Boat Launch, 11475 Highway 7, about 5 km in a straight line from the island. A second launch is at the end of Upper Lakeville Road.'],
   ['Target area', '~1,500 sq m (0.37 acres)'],
 ]
-const tbc = ['Exact parcel boundaries and survey', 'Public boat launch and access route', 'Legal owner entity and title arrangement', 'Provincial and municipal permits for any camping or equipment']
+const tbc = ['Exact parcel boundaries and survey', 'Legal owner entity and title arrangement', 'Provincial and municipal permits for any camping or equipment']
 const roadmap = [
   ['Off-grid solar power', 'Panels and batteries only. No generators, no grid connection.'],
   ['Weather telemetry', 'Open sensor feed for wind, temperature, lake level and rainfall.'],
@@ -33,7 +34,6 @@ function Territory() {
         </dl>
         <div className="glass p-5 lg:col-span-2">
           <h2 className="text-xl">Still to be confirmed</h2>
-          <p className="mt-1 text-sm text-slate-400">The map marker sits in the middle of the lake until the parcel is surveyed.</p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-300">{tbc.map((t) => <li key={t}>{t}</li>)}</ul>
         </div>
       </div>
