@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@theme {
+  --color-ink: #0B1320;
+  --color-pine: #1F8A5B;
+  --color-lake: #1E6FD9;
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+}
+html { background: #0B1320; color: #e6edf5; font-family: var(--font-sans); }
+body { background: radial-gradient(1200px 600px at 80% -10%, rgba(30,111,217,.18), transparent), radial-gradient(900px 500px at -10% 20%, rgba(31,138,91,.16), transparent), #0B1320; min-height: 100vh; }
+.glass { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(10px); border-radius: 1rem; }
+.btn { display:inline-flex; align-items:center; gap:.5rem; padding:.65rem 1.1rem; border-radius:.7rem; font-weight:600; background:#1F8A5B; color:#fff; transition: filter .15s; }
+.btn:hover { filter: brightness(1.12); } .btn:disabled { opacity:.5 }
+.btn.blue { background:#1E6FD9 } .btn.ghost { background:transparent; border:1px solid rgba(255,255,255,.25) }
+.input { width:100%; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); border-radius:.6rem; padding:.6rem .8rem; color:inherit }
+h1,h2,h3 { font-family: var(--font-display); }
+:focus-visible { outline: 2px solid #1E6FD9; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
