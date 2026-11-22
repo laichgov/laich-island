@@ -15,8 +15,7 @@ export const getPending = createServerFn({ method: 'GET' }).handler(async () => 
 })
 
 export const registerFn = createServerFn({ method: 'POST' })
-  .inputValidator((d: { alias: string; password: string; reason: string }) => d)
-  .handler(async ({ data }) => {
+  .handler(async ({ data }: { data: { alias: string; password: string; reason: string } }) => {
     const alias = clean(data.alias, 40), reason = clean(data.reason, 500)
     if (alias.length < 2) return { error: 'Alias must be at least 2 characters.' }
     if (data.password.length < 6) return { error: 'Password must be at least 6 characters.' }
@@ -27,8 +26,7 @@ export const registerFn = createServerFn({ method: 'POST' })
   })
 
 export const loginFn = createServerFn({ method: 'POST' })
-  .inputValidator((d: { alias: string; password: string }) => d)
-  .handler(async ({ data }) => {
+  .handler(async ({ data }: { data: { alias: string; password: string } }) => {
     const c = await db.login(clean(data.alias, 40), data.password)
     if (!c) return { error: 'Alias or password is incorrect.' }
     await session(c.id)
@@ -40,8 +38,7 @@ export const logoutFn = createServerFn({ method: 'POST' }).handler(async () => {
 })
 
 export const reviewFn = createServerFn({ method: 'POST' })
-  .inputValidator((d: { id: number; approve: boolean }) => d)
-  .handler(async ({ data }) => {
+  .handler(async ({ data }: { data: { id: number; approve: boolean } }) => {
     const u = await me(); if (!u?.is_admin) return { error: 'Admins only.' }
     await db.setStatus(data.id, data.approve ? 'approved' : 'rejected'); return { ok: true }
   })
@@ -49,8 +46,7 @@ export const reviewFn = createServerFn({ method: 'POST' })
 export const getRefs = createServerFn({ method: 'GET' }).handler(async () => db.listRefs((await me())?.id))
 
 export const voteFn = createServerFn({ method: 'POST' })
-  .inputValidator((d: { id: number; choice: 'yes' | 'no' | 'abstain' }) => d)
-  .handler(async ({ data }) => {
+  .handler(async ({ data }: { data: { id: number; choice: 'yes' | 'no' | 'abstain' } }) => {
     const u = await me()
     if (u?.status !== 'approved') return { error: 'Only approved citizens can vote.' }
     if (!['yes', 'no', 'abstain'].includes(data.choice)) return { error: 'Invalid choice.' }
@@ -58,8 +54,7 @@ export const voteFn = createServerFn({ method: 'POST' })
   })
 
 export const proposeFn = createServerFn({ method: 'POST' })
-  .inputValidator((d: { title: string; description: string }) => d)
-  .handler(async ({ data }) => {
+  .handler(async ({ data }: { data: { title: string; description: string } }) => {
     const u = await me()
     if (u?.status !== 'approved') return { error: 'Only approved citizens can propose.' }
     const t = clean(data.title, 120), d = clean(data.description, 800)
