@@ -120,8 +120,8 @@ export function FlagScene() {
 
   return (
     <>
-      <div ref={host} aria-hidden className="fixed inset-0 z-0 bg-[#0B1320]" />
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-r from-ink/85 via-ink/40 to-transparent" />
+      <div ref={host} aria-hidden className="absolute inset-0 z-0 bg-[#0B1320]" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-r from-ink/85 via-ink/40 to-transparent" />
     </>
   )
 }
