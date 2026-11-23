@@ -1,10 +1,18 @@
 import { HeadContent, Scripts, Outlet, createRootRoute, Link } from '@tanstack/react-router'
 import css from '../styles.css?url'
 import { getMe } from '~/lib/server'
+import { SITE_URL, DISCORD_URL } from '~/lib/site'
 
 export const Route = createRootRoute({
   head: () => ({
-    meta: [{ charSet: 'utf-8' }, { name: 'viewport', content: 'width=device-width, initial-scale=1' }, { title: 'Commonwealth of Laich Island' }, { name: 'description', content: 'A crowd-funded direct democracy and ecological sanctuary on Laich Island, Lake Charlotte, Nova Scotia.' }],
+    meta: [
+      { charSet: 'utf-8' }, { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'Commonwealth of Laich Island' }, { name: 'description', content: 'A real island. A real direct democracy. Crowd-funded, off-grid and run by one-citizen-one-vote referendums on Laich Island, Lake Charlotte, Nova Scotia.' }, { name: 'theme-color', content: '#0B1320' },
+      { property: 'og:type', content: 'website' }, { property: 'og:site_name', content: 'Commonwealth of Laich Island' }, { property: 'og:title', content: 'Commonwealth of Laich Island: A Real Island. A Real Direct Democracy.' },
+      { property: 'og:description', content: 'A real island. A real direct democracy. Crowd-funded, off-grid and run by one-citizen-one-vote referendums on Laich Island, Lake Charlotte, Nova Scotia.' }, { property: 'og:url', content: SITE_URL }, { property: 'og:image', content: SITE_URL + '/og.png' },
+      { property: 'og:image:width', content: '1200' }, { property: 'og:image:height', content: '630' }, { property: 'og:image:alt', content: 'Flag of the Commonwealth of Laich Island' },
+      { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:title', content: 'Commonwealth of Laich Island' }, { name: 'twitter:description', content: 'A real island. A real direct democracy. Crowd-funded, off-grid and run by one-citizen-one-vote referendums on Laich Island, Lake Charlotte, Nova Scotia.' }, { name: 'twitter:image', content: SITE_URL + '/og.png' },
+    ],
     links: [
       { rel: 'icon', href: '/flag.png' },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -54,6 +62,7 @@ function Root() {
             <div className="space-y-2">
               <p className="eyebrow">Official channels</p>
               <a className="block hover:text-white" href="https://www.youtube.com/@laichgov" target="_blank" rel="noreferrer">YouTube</a>
+              <a className="block hover:text-white" href={DISCORD_URL} target="_blank" rel="noreferrer">Discord</a>
               <a className="block hover:text-white" href="https://boosty.to/laich" target="_blank" rel="noreferrer">Boosty</a>
               <a className="block hover:text-white" href="mailto:laichisland@gmail.com">laichisland@gmail.com</a>
             </div>

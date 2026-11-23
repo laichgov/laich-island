@@ -9,3 +9,8 @@ export const ETHERSCAN = 'https://etherscan.io/address/' + ETH_ADDRESS
 export const FUND_GOAL = 15000
 export const MANUAL_EUR = 0 // euros raised outside this wallet (e.g. Boosty). Update by hand.
 export const FUND_MARKS = [1000, 5000, 10000, 15000]
+
+export const SITE_URL = 'https://laich.vercel.app'
+export const DISCORD_URL = 'https://discord.gg/h33PJw3A9M'
+export const YOUTUBE_URL = 'https://www.youtube.com/@laichgov'
+export const BOOSTY_URL = 'https://boosty.to/laich'

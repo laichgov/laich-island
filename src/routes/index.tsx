@@ -2,7 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { getStats } from '~/lib/server'
 import { FlagHero } from '~/components/FlagHero'
 import { getFund } from '~/lib/fund'
-import { MANUAL_EUR } from '~/lib/site'
+import { MANUAL_EUR, DISCORD_URL } from '~/lib/site'
+import { Community } from '~/components/Community'
 
 const GOAL = 15000
 const marks = [1000, 5000, 10000, 15000]
@@ -33,6 +34,7 @@ function Home() {
             <div className="mt-6 flex gap-5 text-sm text-slate-400">
               <a className="hover:text-white" href="https://boosty.to/laich" target="_blank" rel="noreferrer">Fund on Boosty &rarr;</a>
               <a className="hover:text-white" href="https://www.youtube.com/@laichgov" target="_blank" rel="noreferrer">Watch on YouTube &rarr;</a>
+              <a className="hover:text-white" href={DISCORD_URL} target="_blank" rel="noreferrer">Join Discord &rarr;</a>
             </div>
           </div>
           <div className="mx-auto w-full max-w-[640px] lg:col-span-6"><FlagHero /></div>
@@ -81,6 +83,8 @@ function Home() {
           </article>
         ))}
       </section>
+
+      <Community />
     </div>
   )
 }
