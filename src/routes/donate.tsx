@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getFund } from '~/lib/fund'
 import { ETH_ADDRESS, ETHERSCAN, FUND_GOAL, FUND_MARKS, MANUAL_EUR } from '~/lib/site'
 
@@ -7,14 +7,58 @@ export const Route = createFileRoute('/donate')({ loader: () => getFund(), compo
 
 const rules = [
   ['Network', 'Send on Ethereum Mainnet. ETH and ERC-20 tokens such as USDC and USDT work.'],
-  ['Other chains', 'Bitcoin, Solana, Tron, BNB Chain and layer-2 networks will not show in our public ledger, and some of them cannot be recovered.'],
   ['Irreversible', 'Crypto transfers cannot be undone. Send a small test amount first and check the address on your screen.'],
   ['No extra votes', 'Donations are voluntary. Every citizen gets exactly one vote, whether they donate or not.'],
 ]
 
+const NETWORKS: [boolean, string, string][] = [
+  [true, 'Ethereum Mainnet (ERC-20)', 'ETH, USDT (ERC-20), USDC (ERC-20)'],
+  [false, 'TRON (TRC-20)', 'TRON addresses start with T. USDT on TRON sent here will most likely be lost.'],
+  [false, 'BNB Chain (BEP-20)', 'Will not arrive or will not show in our ledger.'],
+  [false, 'Polygon, Arbitrum, Base, Optimism', 'Not tracked in our public ledger.'],
+  [false, 'Solana, Bitcoin, Litecoin, any other coin', 'Different address formats. Funds will be lost.'],
+]
+
+function NetworkList() {
+  return (
+    <ul className="space-y-2">
+      {NETWORKS.map(([ok, name, note]) => (
+        <li key={name} className={`flex gap-3 rounded-lg border p-3 ${ok ? 'border-pine/50 bg-pine/10' : 'border-[#E04848]/40 bg-[#E04848]/10'}`}>
+          <span aria-hidden className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-sm font-bold text-white ${ok ? 'bg-pine' : 'bg-[#E04848]'}`}>{ok ? '✓' : '✕'}</span>
+          <span className="text-sm"><b className="text-white">{ok ? 'Send on: ' : 'Do NOT send on: '}{name}</b><br /><span className="text-slate-300">{note}</span></span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function WarningModal({ onAck }: { onAck: () => void }) {
+  const [ok, setOk] = useState(false)
+  useEffect(() => { const p = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = p } }, [])
+  return (
+    <div className="fixed inset-0 z-[100] flex justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-sm" role="alertdialog" aria-modal="true" aria-labelledby="warn-title" aria-describedby="warn-desc">
+      <div className="my-auto w-full max-w-lg overflow-hidden rounded-2xl border border-[#E04848]/60 bg-[#0d1522] shadow-2xl">
+        <div className="bg-[#E04848] px-6 py-3 text-sm font-bold uppercase tracking-[.16em] text-white">⚠ Read before you send</div>
+        <div className="space-y-5 p-6">
+          <h2 id="warn-title" className="!text-3xl">This is an Ethereum address. Do not send TRON.</h2>
+          <p id="warn-desc" className="text-slate-300">Sending a coin on the wrong network is permanent. If you send TRON (TRC-20) USDT or any other chain&rsquo;s asset to this <b className="text-white">0x&hellip;</b> address, it will most likely be lost for good, and nobody can reverse it.</p>
+          <NetworkList />
+          <p className="rounded-lg bg-white/5 p-3 text-sm text-slate-300"><b className="text-white">On an exchange?</b> When you withdraw, set the network to <b className="text-white">&ldquo;Ethereum (ERC-20)&rdquo;</b>. If the exchange does not offer it for your coin, do not send.</p>
+          <label className="flex cursor-pointer items-start gap-3 text-sm">
+            <input type="checkbox" autoFocus checked={ok} onChange={(e) => setOk(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[#1F8A5B]" />
+            <span>I understand. I will send only on <b>Ethereum Mainnet (ERC-20)</b> and I will not use TRON.</span>
+          </label>
+          <button className="btn w-full" disabled={!ok} onClick={onAck}>Show address and QR code</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Donate() {
   const fund = Route.useLoaderData()
   const [copied, setCopied] = useState(false)
+  const [ack, setAck] = useState(false)
   const raised = MANUAL_EUR + (fund?.raised_eur ?? 0)
   const pct = Math.min(100, (raised / FUND_GOAL) * 100)
   const copy = async () => {
@@ -25,6 +69,7 @@ function Donate() {
   }
   return (
     <div className="space-y-10">
+      {!ack && <WarningModal onAck={() => setAck(true)} />}
       <div className="max-w-3xl">
         <p className="eyebrow">Phase I</p>
         <h1 className="mt-3">Fund the island</h1>
@@ -48,13 +93,18 @@ function Donate() {
         <div className="h-6" />
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <section className="rounded-2xl border border-[#E04848]/50 bg-[#E04848]/[.07] p-5 sm:p-6" aria-label="Network warning">
+        <p className="text-sm font-bold uppercase tracking-[.14em] text-[#ff8a8a]">⚠ Ethereum Mainnet only. Not TRON.</p>
+        <div className="mt-3"><NetworkList /></div>
+      </section>
+
+      <div className={`grid gap-6 lg:grid-cols-5 ${ack ? '' : 'pointer-events-none select-none blur-md'}`} aria-hidden={!ack}>
         <section className="glass p-6 sm:p-8 lg:col-span-2">
           <p className="eyebrow">Scan to pay</p>
           <div className="mx-auto mt-4 max-w-[320px] rounded-2xl bg-white p-3">
             <img src="/eth-qr.png" alt={`QR code for Ethereum address ${ETH_ADDRESS}`} className="h-auto w-full" />
           </div>
-          <p className="mt-4 text-center text-sm text-slate-400">Scan with MetaMask or any Ethereum wallet</p>
+          <p className="mt-4 text-center text-sm text-slate-400">Scan with MetaMask or any Ethereum wallet. Network: Ethereum Mainnet.</p>
         </section>
 
         <section className="glass space-y-5 p-6 sm:p-8 lg:col-span-3">
