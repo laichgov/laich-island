@@ -17,7 +17,7 @@ export const Route = createRootRoute({
   component: Root,
 })
 
-const nav = [['/', 'Home'], ['/territory', 'Territory'], ['/constitution', 'Constitution'], ['/passport', 'Passport'], ['/referendums', 'Referendums']] as const
+const nav = [['/', 'Home'], ['/territory', 'Territory'], ['/constitution', 'Constitution'], ['/passport', 'Passport'], ['/referendums', 'Referendums'], ['/donate', 'Fund']] as const
 const linkCls = 'rounded-md px-3 py-1.5 text-[13px] text-slate-300 transition hover:text-white'
 
 function Root() {

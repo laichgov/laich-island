@@ -1,16 +1,18 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { getStats } from '~/lib/server'
 import { FlagHero } from '~/components/FlagHero'
+import { getFund } from '~/lib/fund'
+import { MANUAL_EUR } from '~/lib/site'
 
 const GOAL = 15000
-const RAISED = 0 // update as Phase I contributions arrive
 const marks = [1000, 5000, 10000, 15000]
 
-export const Route = createFileRoute('/')({ loader: () => getStats(), component: Home })
+export const Route = createFileRoute('/')({ loader: async () => ({ ...(await getStats()), fund: await getFund() }), component: Home })
 
 function Home() {
   const s = Route.useLoaderData()
-  const pct = Math.min(100, (RAISED / GOAL) * 100)
+  const raised = MANUAL_EUR + (s.fund?.raised_eur ?? 0)
+  const pct = Math.min(100, (raised / GOAL) * 100)
   return (
     <div className="space-y-6">
       <section className="relative isolate overflow-hidden rounded-[28px] border border-white/10 bg-[#050a12]">
@@ -48,10 +50,10 @@ function Home() {
           <p className="eyebrow">Phase I</p>
           <h2 className="mt-3">Island acquisition</h2>
           <p className="mt-3 text-slate-300">Every contribution is tracked in a public ledger. Spending beyond the stated purpose is decided by referendum.</p>
-          <a className="btn mt-6" href="https://boosty.to/laich" target="_blank" rel="noreferrer">Contribute on Boosty</a>
+          <div className="mt-6 flex flex-wrap gap-3"><Link to="/donate" className="btn">Pay with crypto</Link><a className="btn ghost" href="https://boosty.to/laich" target="_blank" rel="noreferrer">Boosty</a></div>
         </div>
         <div className="lg:col-span-3">
-          <p className="font-[var(--font-display)] text-5xl sm:text-6xl">&euro;{RAISED.toLocaleString()} <span className="text-2xl text-slate-500">/ &euro;{GOAL.toLocaleString()}</span></p>
+          <p className="font-[var(--font-display)] text-5xl sm:text-6xl">&euro;{raised.toLocaleString()} <span className="text-2xl text-slate-500">/ &euro;{GOAL.toLocaleString()}</span></p>
           <div className="relative mt-8 h-2 rounded-full bg-white/10">
             <div className="h-2 rounded-full bg-gradient-to-r from-pine to-lake" style={{ width: `${Math.max(pct, 0.8)}%` }} />
             {marks.map((m) => (
