@@ -13,12 +13,14 @@ export const getRegistry = createServerFn({ method: 'GET' }).handler(async () =>
 export const getPending = createServerFn({ method: 'GET' }).handler(async () => { const u = await me(); return u?.is_admin ? db.pendingCitizens() : [] })
 export const getRefs = createServerFn({ method: 'GET' }).handler(async () => db.listRefs((await me())?.id))
 
-export const registerFn = createServerFn({ method: 'POST' }).handler(async ({ data }: { data: { alias: string; password: string; reason: string } }) => {
+export const registerFn = createServerFn({ method: 'POST' }).handler(async ({ data }: { data: { alias: string; password: string; reason: string; discord?: string } }) => {
   const alias = clean(data.alias, 40), reason = clean(data.reason, 500)
+  const discord = clean(data.discord ?? '', 40).replace(/^@/, '') || null
+  if (discord && !/^[\w.#\- ]{2,40}$/.test(discord)) return { error: 'Discord username looks invalid. Use letters, numbers, dots or underscores, or leave it empty.' }
   if (alias.length < 2) return { error: 'Alias must be at least 2 characters.' }
   if (String(data.password).length < 6) return { error: 'Password must be at least 6 characters.' }
   if (await db.aliasTaken(alias)) return { error: 'That alias is already registered.' }
-  const c = await db.register(alias, data.password, reason)
+  const c = await db.register(alias, data.password, reason, discord)
   await session(c.id); return { ok: true as const }
 })
 export const loginFn = createServerFn({ method: 'POST' }).handler(async ({ data }: { data: { alias: string; password: string } }) => {

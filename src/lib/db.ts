@@ -2,7 +2,7 @@ import { neon } from '@neondatabase/serverless'
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 
 export type Citizen = {
-  id: number; citizen_number: string; alias: string; title: string | null; reason: string | null
+  id: number; citizen_number: string; alias: string; title: string | null; reason: string | null; discord: string | null
   status: 'pending' | 'approved' | 'rejected'; is_admin: boolean; created_at: string
 }
 export type Ref = { id: number; title: string; description: string; author: string; closed: boolean; closes_at: string | null; open: boolean; yes: number; no: number; abstain: number; mine: string | null }
@@ -32,7 +32,7 @@ export function init() {
   return (inited ??= (async () => {
     if (!sql) {
       if (M.ready) return; M.ready = true
-      M.citizens.push({ id: 1, citizen_number: 'CLI-0001', alias: 'Founder & Managing Minister', title: 'Founder & Managing Minister', reason: null, status: 'approved', is_admin: true, created_at: new Date().toISOString(), pw_hash: null })
+      M.citizens.push({ id: 1, citizen_number: 'CLI-0001', alias: 'Founder & Managing Minister', title: 'Founder & Managing Minister', reason: null, discord: null, status: 'approved', is_admin: true, created_at: new Date().toISOString(), pw_hash: null })
       SEED_REFS.forEach(([t, d], i) => M.refs.push({ id: i + 1, title: t, description: d, author: 'Managing Minister', closed: false, closes_at: null }))
       return
     }
@@ -42,24 +42,25 @@ export function init() {
     await q(`CREATE TABLE IF NOT EXISTS votes (referendum_id INT NOT NULL, citizen_id INT NOT NULL, choice TEXT NOT NULL, PRIMARY KEY (referendum_id, citizen_id))`)
     await q(`ALTER TABLE referendums ADD COLUMN IF NOT EXISTS closed BOOLEAN NOT NULL DEFAULT FALSE`)
     await q(`ALTER TABLE referendums ADD COLUMN IF NOT EXISTS closes_at TIMESTAMPTZ`)
+    await q(`ALTER TABLE citizens ADD COLUMN IF NOT EXISTS discord TEXT`)
     await q(`INSERT INTO citizens (citizen_number, alias, title, status, is_admin) SELECT 'CLI-0001','Founder & Managing Minister','Founder & Managing Minister','approved',TRUE WHERE NOT EXISTS (SELECT 1 FROM citizens WHERE citizen_number='CLI-0001')`)
     if (!(await q(`SELECT 1 FROM referendums LIMIT 1`)).length)
       for (const [t, d] of SEED_REFS) await q(`INSERT INTO referendums (title, description, author) VALUES ($1,$2,'Managing Minister')`, [t, d])
   })())
 }
 
-export async function register(alias: string, password: string, reason: string): Promise<Citizen> {
+export async function register(alias: string, password: string, reason: string, discord: string | null = null): Promise<Citizen> {
   await init(); const pw = hash(password)
   if (!sql) {
     const f = M.citizens[0] as Row
     if (!f.pw_hash) { Object.assign(f, { alias, pw_hash: pw }); return pub(f) }
     const id = M.citizens.length + 1
-    const c: Row = { id, citizen_number: 'CLI-' + String(id).padStart(4, '0'), alias, title: null, reason, status: 'pending', is_admin: false, created_at: new Date().toISOString(), pw_hash: pw }
+    const c: Row = { id, citizen_number: 'CLI-' + String(id).padStart(4, '0'), alias, title: null, reason, discord, status: 'pending', is_admin: false, created_at: new Date().toISOString(), pw_hash: pw }
     M.citizens.push(c); return pub(c)
   }
   const claimed = await q(`UPDATE citizens SET alias=$1, pw_hash=$2 WHERE citizen_number='CLI-0001' AND pw_hash IS NULL RETURNING *`, [alias, pw])
   if (claimed.length) return claimed[0]
-  const r = await q(`INSERT INTO citizens (alias, reason, pw_hash) VALUES ($1,$2,$3) RETURNING id`, [alias, reason, pw])
+  const r = await q(`INSERT INTO citizens (alias, reason, pw_hash, discord) VALUES ($1,$2,$3,$4) RETURNING id`, [alias, reason, pw, discord])
   const u = await q(`UPDATE citizens SET citizen_number='CLI-'||lpad(id::text,4,'0') WHERE id=$1 RETURNING *`, [r[0].id])
   return u[0]
 }
@@ -94,7 +95,7 @@ export async function publicCitizens(): Promise<Citizen[]> {
 export async function pendingCitizens(): Promise<Citizen[]> {
   await init()
   if (!sql) return M.citizens.filter((c: Row) => c.status === 'pending').map(pub)
-  return (await q(`SELECT id,citizen_number,alias,title,reason,status,is_admin,created_at FROM citizens WHERE status='pending' ORDER BY id`)) as Citizen[]
+  return (await q(`SELECT id,citizen_number,alias,title,reason,discord,status,is_admin,created_at FROM citizens WHERE status='pending' ORDER BY id`)) as Citizen[]
 }
 export async function setStatus(id: number, status: 'approved' | 'rejected') {
   await init()

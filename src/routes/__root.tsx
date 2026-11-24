@@ -2,6 +2,7 @@ import { HeadContent, Scripts, Outlet, createRootRoute, Link } from '@tanstack/r
 import css from '../styles.css?url'
 import { getMe } from '~/lib/server'
 import { SITE_URL, DISCORD_URL } from '~/lib/site'
+import { DiscordPill } from '~/components/DiscordNotice'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -29,6 +30,7 @@ const nav = [['/', 'Home'], ['/territory', 'Territory'], ['/constitution', 'Cons
 const linkCls = 'rounded-md px-3 py-1.5 text-[13px] text-slate-300 transition hover:text-white'
 
 function Root() {
+  const { me } = Route.useRouteContext()
   return (
     <html lang="en">
       <head><HeadContent /></head>
@@ -49,7 +51,7 @@ function Root() {
           </div>
         </header>
         <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8"><Outlet /></main>
-        <footer className="mt-20 border-t border-white/[.07] py-12 text-sm text-slate-400">
+        <footer id="site-footer" className="mt-20 border-t border-white/[.07] py-12 text-sm text-slate-400">
           <div className="mx-auto grid max-w-6xl gap-10 px-5 sm:px-8 md:grid-cols-3">
             <div className="space-y-3">
               <p className="text-[13px] font-semibold uppercase tracking-[.18em] text-white">Commonwealth of Laich Island</p>
@@ -69,6 +71,7 @@ function Root() {
           </div>
           <p className="mx-auto mt-10 max-w-6xl border-t border-white/[.07] px-5 pt-6 text-xs text-slate-500 sm:px-8">Heraldic crest element adapted from Crest of Nova Scotia (CC BY-SA 3.0) via Wikimedia Commons.</p>
         </footer>
+        {me?.status === 'pending' && <DiscordPill number={me.citizen_number} />}
         <Scripts />
       </body>
     </html>
