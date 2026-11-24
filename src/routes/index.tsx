@@ -4,6 +4,7 @@ import { FlagHero } from '~/components/FlagHero'
 import { getFund } from '~/lib/fund'
 import { MANUAL_EUR, DISCORD_URL } from '~/lib/site'
 import { Community } from '~/components/Community'
+import { Symbols } from '~/components/Symbols'
 
 const GOAL = 15000
 const marks = [1000, 5000, 10000, 15000]
@@ -46,6 +47,8 @@ function Home() {
         <Stat label="Active referendums" value={String(s.referendums)} />
         <Stat label="Target island area" value="~1,500 m²" sub="0.37 acres" />
       </section>
+
+      <Symbols />
 
       <section className="glass grid gap-8 p-6 sm:p-10 lg:grid-cols-5">
         <div className="lg:col-span-2">

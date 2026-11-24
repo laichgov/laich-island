@@ -15,7 +15,11 @@ export const Route = createRootRoute({
       { name: 'twitter:card', content: 'summary_large_image' }, { name: 'twitter:title', content: 'Commonwealth of Laich Island' }, { name: 'twitter:description', content: 'A real island. A real direct democracy. Crowd-funded, off-grid and run by one-citizen-one-vote referendums on Laich Island, Lake Charlotte, Nova Scotia.' }, { name: 'twitter:image', content: SITE_URL + '/og.png' },
     ],
     links: [
-      { rel: 'icon', href: '/flag.png' },
+      { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
+      { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
+      { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/icon-192.png' },
+      { rel: 'shortcut icon', href: '/favicon.ico' },
+      { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap' },
@@ -38,7 +42,7 @@ function Root() {
         <header className="sticky top-0 z-50 border-b border-white/[.07] bg-[#080e19]/75 backdrop-blur-xl">
           <nav className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5 sm:px-8">
             <Link to="/" className="flex items-center gap-2.5">
-              <img src="/flag.png" alt="" className="h-5 w-8 rounded-[3px] object-cover ring-1 ring-white/20" />
+              <img src="/coat-of-arms-sm.png" alt="" width={31} height={36} className="h-9 w-auto" />
               <span className="text-[13px] font-semibold uppercase tracking-[.18em]">Laich Island</span>
             </Link>
             <div className="ml-auto hidden items-center gap-1 md:flex">
