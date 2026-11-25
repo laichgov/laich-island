@@ -3,6 +3,7 @@ import css from '../styles.css?url'
 import { getMe } from '~/lib/server'
 import { SITE_URL, DISCORD_URL } from '~/lib/site'
 import { DiscordPill } from '~/components/DiscordNotice'
+import { NotificationBell } from '~/components/Notifications'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -48,7 +49,7 @@ function Root() {
             <div className="ml-auto hidden items-center gap-1 md:flex">
               {nav.map(([to, l]) => <Link key={to} to={to} className={linkCls} activeProps={{ className: 'bg-white/10 !text-white' }} activeOptions={{ exact: to === '/' }}>{l}</Link>)}
             </div>
-            <Link to="/passport" className="btn ml-auto !px-4 !py-2 text-sm md:ml-0">Get your ID</Link>
+            <div className="ml-auto flex items-center gap-2 md:ml-0">{me && <NotificationBell />}<Link to="/passport" className="btn !px-4 !py-2 text-sm">{me ? 'Passport' : 'Get your ID'}</Link></div>
           </nav>
           <div className="flex gap-1 overflow-x-auto px-4 pb-2 md:hidden">
             {nav.map(([to, l]) => <Link key={to} to={to} className={linkCls} activeProps={{ className: 'bg-white/10 !text-white' }} activeOptions={{ exact: to === '/' }}>{l}</Link>)}

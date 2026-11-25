@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { getRegistry, getPending, registerFn, loginFn, logoutFn, reviewFn } from '~/lib/server'
 import { IdCard } from '~/components/IdCard'
 import { DiscordNotice } from '~/components/DiscordNotice'
+import { AdminBroadcast } from '~/components/AdminTools'
 
 export const Route = createFileRoute('/passport')({
   loader: async () => ({ registry: await getRegistry(), pending: await getPending() }),
@@ -89,6 +90,7 @@ function Passport() {
               </ul>
             </section>
           )}
+          {me.is_admin && <AdminBroadcast />}
         </div>
       )}
 

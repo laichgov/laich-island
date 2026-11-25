@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouterState } from '@tanstack/react-router'
 import { DISCORD_URL } from '~/lib/site'
+import { PushToggle } from '~/components/Notifications'
 
 /** Big box for the Passport page, shown while an application is pending. */
 export function DiscordNotice({ number }: { number: string }) {
@@ -20,6 +21,7 @@ export function DiscordNotice({ number }: { number: string }) {
         <button className="btn ghost !py-2" onClick={copy}>{copied ? 'Copied ✓' : 'Copy ID'}</button>
         <a className="btn blue" href={DISCORD_URL} target="_blank" rel="noreferrer">Join our Discord &rarr;</a>
       </div>
+      <div className="mt-5 border-t border-white/10 pt-4"><PushToggle /></div>
     </section>
   )
 }
